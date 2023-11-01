@@ -1,6 +1,12 @@
 import math
 import random
 
+def main():
+  for i in range(2, 100):
+    tangent = run_test(i, 100, step=0.00001)[1]
+    magnitude = get_magnitude(tangent)
+    print(f"In {i} dimensions the magnitude of the tangents in the unit directions are {magnitude}")
+
 # function to be minimized
 def objective_function(point, points):
   score = 0
@@ -8,48 +14,26 @@ def objective_function(point, points):
     score+= get_dist(point, p)
   return score/len(points)
 
-
-def get_avg_dist(point, points):
-  sum = 0
-  for p in points:
-    sum += get_dist(point, p)
-
-  return sum / len(points)
-
-def get_dist(p1, p2):
-  if len(p1) == 2 and len(p2) == 2:
-    return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
-  elif len(p1) == 3 and len(p2) == 3:
-    return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2 + (p1[2] - p2[2])**2)
-  elif len(p1) == 4 and len(p2) == 4:
-    return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2 + (p1[2] - p2[2])**2 + (p1[3] - p2[3])**2)
-  elif len(p1) == 5 and len(p2) == 5:
-    return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2 + (p1[2] - p2[2])**2 + (p1[3] - p2[3])**2 + (p1[4] - p2[4])**2)
-  else:
-    print("Error, point dimensions not supported")
-    return None
-  
+# HELPER FUNCTIONS
 def generate_random_points(n, dim):
   points = []
   for i in range(n):
     point = []
     for j in range(dim):
-      point.append(random.randint(0, 10))
+      point.append(random.randint(-100, 100))
     points.append(point)
   return points
 
-def get_avg_vector(points):
-  sum = [0] * len(points[0])
-  for p in points:
-    for i in range(len(p)):
-      sum[i] += p[i]
-  
-  avg = []
-  for i in range(len(sum)):
-    avg.append(sum[i] / len(points))
-  
-  return avg
 
+def run_test(dimensions, number_points, step=0.01):
+  points = generate_random_points(number_points, dimensions)
+  est = get_avg_vector(points)
+  tans = get_tangents(est, points, step=step)
+  return est, tans
+
+
+
+# get tangent in all unit directions
 def get_tangents(point, points, step=0.01):
   tangents=[]
   for i in range(len(point)):
@@ -65,11 +49,24 @@ def get_tangents(point, points, step=0.01):
   
   return tangents
 
-def run_test(dimensions, number_points, step=0.01):
-  points = generate_random_points(number_points, dimensions)
-  est = get_avg_vector(points)
-  tans = get_tangents(est, points, step=step)
-  return est, tans
+# VECTOR RELATED FUNCTIONS
+def get_dist(p1, p2):
+  norm = subtract_vectors(p1, p2)
+  if not norm:
+    return None
+  return get_magnitude(norm)
+
+def get_avg_vector(points):
+  sum = [0] * len(points[0])
+  for p in points:
+    for i in range(len(p)):
+      sum[i] += p[i]
+  
+  avg = []
+  for i in range(len(sum)):
+    avg.append(sum[i] / len(points))
+  
+  return avg
 
 def get_magnitude(vector):
   sum = 0
@@ -78,9 +75,17 @@ def get_magnitude(vector):
   
   return math.sqrt(sum)
 
+def subtract_vectors(v1, v2):
+  if len(v1) != len(v2):
+    print("Error, vectors not same length")
+    return None
+  result = []
+  for i in range(len(v1)):
+    result.append(v1[i] - v2[i])
+  
+  return result
 
-for i in range(2, 6):
-  tangent = run_test(i, 500, step=0.00001)[1]
-  magnitude = get_magnitude(tangent)
-  print(f"In {i} dimensions the magnitude of the tangents in the unit direction is {magnitude}")
+
+
+main()
 
